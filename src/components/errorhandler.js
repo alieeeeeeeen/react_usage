@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Modal } from './modal';
 
-
-const withErrorHandler = (WrapperdComponent, axios) => {
+export const withErrorHandler = (WrapperdComponent, axios) => {
     return props => {
         const [error, setError] = useState(null);
 
@@ -9,12 +9,11 @@ const withErrorHandler = (WrapperdComponent, axios) => {
             setError(null);
             return req
         })
-        const resInterceptor = axios.interceptors.response.use(res => {
-            return res,
+        const resInterceptor = axios.interceptors.response.use(res => res,
             error => {
                 setError(error)
             }
-        })
+        )
 
         useEffect(() => {
             return () => {
@@ -22,6 +21,13 @@ const withErrorHandler = (WrapperdComponent, axios) => {
                 axios.interceptors.response.eject(resInterceptor);
             }
         }, [reqInterceptor, resInterceptor])
-
+        return (
+            <React.Fragment>
+                <Modal show={error}>
+                    {error && error.message ? error.message : null}
+                </Modal>
+                <WrapperdComponent {...props} />
+            </React.Fragment>
+        )
     }
 }
